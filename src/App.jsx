@@ -909,11 +909,11 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                 </span>
               </p>
               {snap && (
-                <button
-                  onClick={() => setViewSnapshot({ dev, snapshot: snap })}
-                  className="text-xs bg-gray-800 hover:bg-blue-900 border border-gray-700 hover:border-blue-700 text-gray-400 hover:text-blue-300 px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap">
-                  Ver Respostas
-                </button>
+              <button
+              onClick={() => setViewSnapshot({ dev, snapshot: snap })}
+              className="text-xs bg-gray-800 hover:bg-orange-950 border border-orange-600 hover:border-orange-400 text-orange-400 hover:text-orange-300 px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap">
+             Ver Respostas
+            </button>
               )}
             </div>
           );
@@ -1256,7 +1256,7 @@ async function saveDevAnswers(dev, ans) {
     const hist = raw ? JSON.parse(raw) : {};
     if (!hist[dev]) hist[dev] = [];
     hist[dev].push({
-      timestamp: new Date().toISOString(),
+    timestamp: ans._savedAt,
       systems: ans["_systems"] || [],
       answers: Object.fromEntries(
         Object.entries(ans).filter(([k]) => k !== "_systems" && k !== "_savedAt" && k !== "_savedHistory")
