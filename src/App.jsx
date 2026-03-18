@@ -1143,11 +1143,31 @@ async function saveHistory(hist) {
   localStorage.setItem("bft:history", JSON.stringify(hist));
 }
 async function saveDevAnswers(dev, ans) {
+  // Salva respostas atuais
   const next = { ...answers };
-  if (ans === null) delete next[dev];
-  else next[dev] = ans;
+  if (ans === null) {
+    delete next[dev];
+  } else {
+    next[dev] = ans;
+  }
   setAnswers(next);
   localStorage.setItem("bft:answers", JSON.stringify(next));
+
+  // Salva snapshot no histórico
+  if (ans !== null) {
+    const raw = localStorage.getItem("bft:history");
+    const hist = raw ? JSON.parse(raw) : {};
+    if (!hist[dev]) hist[dev] = [];
+    hist[dev].push({
+      timestamp: new Date().toISOString(),
+      systems: ans["_systems"] || [],
+      answers: Object.fromEntries(
+        Object.entries(ans).filter(([k]) => k !== "_systems" && k !== "_savedAt" && k !== "_savedHistory")
+      ),
+    });
+    setHistory(hist);
+    localStorage.setItem("bft:history", JSON.stringify(hist));
+  }
 }
   if (!loaded) return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
