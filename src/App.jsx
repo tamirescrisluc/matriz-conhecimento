@@ -875,11 +875,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                         : <span className="text-xs bg-gray-800 border border-gray-700 text-gray-500 px-2 py-0.5 rounded-full">⏳ Pendente</span>}
                     </div>
                     <p className="text-gray-500 text-xs">Código: <span className="text-gray-300 font-mono font-bold tracking-widest">{genCode(dev)}</span></p>
-**Trecho 4 — Botão "Ver Respostas" na aba Códigos**
 
-Localize este bloco no `App.jsx`:
-
-```js
 {answers[dev] && (
   <div className="mt-1 space-y-0.5">
     {answers[dev]._savedHistory?.length > 0
