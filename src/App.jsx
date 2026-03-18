@@ -223,6 +223,64 @@ function SystemSelectionStep({ dev, systems, initialSelected, onConfirm }) {
     </div>
   );
 }
+// ── Snapshot View ─────────────────────────────────────────────
+function SnapshotView({ dev, snapshot, config, onBack }) {
+  const rows = [];
+  for (const mod of config.modules) {
+    if (mod.submodules.length === 0) rows.push({ mod: mod.name, sub: null, key: mod.id });
+    else mod.submodules.forEach(sub => rows.push({ mod: mod.name, sub: sub.name, key: sub.id }));
+  }
+  const date = new Date(snapshot.timestamp).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900 p-8" style={{ fontFamily: "system-ui,sans-serif" }}>
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">🧠 Respostas — {dev}</h1>
+            <p className="text-sm text-gray-500 mt-1">Snapshot de <strong>{date}</strong></p>
+            {snapshot.systems?.length > 0 && (
+              <div className="flex gap-2 mt-2 flex-wrap">
+                {snapshot.systems.map(s => <span key={s} className="bg-blue-100 text-blue-700 text-xs font-semibold rounded-full px-3 py-1">{s}</span>)}
+              </div>
+            )}
+          </div>
+          <button onClick={onBack} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg transition-colors">← Voltar</button>
+        </div>
+
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "24px" }}>
+          <thead>
+            <tr style={{ background: "#1e293b" }}>
+              <th style={{ padding: "10px 12px", color: "#fff", fontSize: "12px", fontWeight: 600, textAlign: "left" }}>Processo</th>
+              <th style={{ padding: "10px 12px", color: "#fff", fontSize: "12px", fontWeight: 600, textAlign: "left" }}>Subprocesso</th>
+              <th style={{ padding: "10px 12px", color: "#fff", fontSize: "12px", fontWeight: 600, textAlign: "center" }}>Nível</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => {
+              const lvl = snapshot.answers[r.key] ?? 0;
+              return (
+                <tr key={r.key} style={{ background: i % 2 === 0 ? "#fff" : "#f8fafc" }}>
+                  <td style={{ padding: "8px 12px", borderBottom: "1px solid #e5e7eb", color: "#374151", fontSize: "13px" }}>{r.mod}</td>
+                  <td style={{ padding: "8px 12px", borderBottom: "1px solid #e5e7eb", color: "#6b7280", fontSize: "13px" }}>{r.sub ?? "—"}</td>
+                  <td style={{ padding: "8px 12px", borderBottom: "1px solid #e5e7eb", textAlign: "center" }}>
+                    <span style={{ display: "inline-block", background: LEVEL_COLORS[lvl], color: "#fff", fontWeight: 700, borderRadius: "6px", padding: "2px 10px", fontSize: "12px" }}>
+                      {lvl} – {LEVELS[lvl].label}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <p style={{ textAlign: "center", fontSize: "11px", color: "#9ca3af" }}>Bus Factor Tracker · Snapshot de {date}</p>
+      </div>
+    </div>
+  );
+}
+
+
+
 
 // ── Report View ───────────────────────────────────────────────
 function ReportView({ dev, config, devAnswers, onBack }) {
@@ -589,6 +647,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
   const [copiedDev, setCopiedDev] = useState(null);
   const [previewDev, setPreviewDev] = useState("");
   const [previewMode, setPreviewMode] = useState(false);
+  const [viewSnapshot, setViewSnapshot] = useState(null);
 
   const systems = config.systems || DEFAULT_SYSTEMS;
 
@@ -640,6 +699,10 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
   function busFactor(key) { return config.devs.filter(d => (answers[d]?.[key] ?? 0) >= 2).length; }
   function bfColor(n) { if (n <= 1) return "#ef4444"; if (n === 2) return "#eab308"; return "#22c55e"; }
 
+  if (viewSnapshot) {
+  return <SnapshotView dev={viewSnapshot.dev} snapshot={viewSnapshot.snapshot} config={config} onBack={() => setViewSnapshot(null)} />;
+  }
+
   if (previewMode && previewDev) {
     return (
       <DevFillView
@@ -662,7 +725,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
       </div>
 
       <div className="bg-gray-900 border-b border-gray-800 flex overflow-x-auto">
-        {[["admin","⚙️ Admin"],["links","🔗 Códigos"],["preview","👁️ Simular Dev"],["matrix","📊 Matriz"]].map(([k,l]) => (
+        {[["admin","⚙️ Admin"],["links","🔗 Devs"],["preview","👁️ Simular Dev"],["matrix","📊 Matriz"]].map(([k,l]) => (
           <button key={k} onClick={() => setTab(k)}
             className={`px-5 py-3 text-sm font-medium whitespace-nowrap transition-colors ${tab === k ? "border-b-2 border-yellow-500 text-yellow-400" : "text-gray-400 hover:text-gray-200"}`}>
             {l}
@@ -812,23 +875,61 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                         : <span className="text-xs bg-gray-800 border border-gray-700 text-gray-500 px-2 py-0.5 rounded-full">⏳ Pendente</span>}
                     </div>
                     <p className="text-gray-500 text-xs">Código: <span className="text-gray-300 font-mono font-bold tracking-widest">{genCode(dev)}</span></p>
-                    {answers[dev] && (
-                      <div className="mt-1 space-y-0.5">
-                        {answers[dev]._savedHistory?.length > 0
-                          ? [...answers[dev]._savedHistory].reverse().map((ts, i) => (
-                              <p key={i} className="text-xs">
-                                <span className="text-gray-600">{i === 0 ? "💾 Último save:" : "   └"}</span>{" "}
-                                <span className={i === 0 ? "text-gray-400" : "text-gray-600"}>
-                                  {new Date(ts).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}
-                                </span>
-                              </p>
-                            ))
-                          : answers[dev]._savedAt
-                            ? <p className="text-gray-600 text-xs">💾 Salvo em: <span className="text-gray-400">{new Date(answers[dev]._savedAt).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}</span></p>
-                            : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
-                        }
-                      </div>
-                    )}
+**Trecho 4 — Botão "Ver Respostas" na aba Códigos**
+
+Localize este bloco no `App.jsx`:
+
+```js
+{answers[dev] && (
+  <div className="mt-1 space-y-0.5">
+    {answers[dev]._savedHistory?.length > 0
+      ? [...answers[dev]._savedHistory].reverse().map((ts, i) => (
+          <p key={i} className="text-xs">
+            <span className="text-gray-600">{i === 0 ? "💾 Último save:" : "   └"}</span>{" "}
+            <span className={i === 0 ? "text-gray-400" : "text-gray-600"}>
+              {new Date(ts).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}
+            </span>
+          </p>
+        ))
+      : answers[dev]._savedAt
+        ? <p className="text-gray-600 text-xs">💾 Salvo em: <span className="text-gray-400">{new Date(answers[dev]._savedAt).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}</span></p>
+        : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
+    }
+  </div>
+)}
+
+
+{answers[dev] && (
+  <div className="mt-1 space-y-1">
+    {answers[dev]._savedHistory?.length > 0
+      ? [...answers[dev]._savedHistory].reverse().map((ts, i) => {
+          const snap = history[dev]?.find(s => s.timestamp === ts);
+          return (
+            <div key={i} className="flex items-center gap-2">
+              <p className="text-xs">
+                <span className="text-gray-600">{i === 0 ? "💾 Último save:" : "   └"}</span>{" "}
+                <span className={i === 0 ? "text-gray-400" : "text-gray-600"}>
+                  {new Date(ts).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}
+                </span>
+              </p>
+              {snap && (
+                <button
+                  onClick={() => setViewSnapshot({ dev, snapshot: snap })}
+                  className="text-xs bg-gray-800 hover:bg-blue-900 border border-gray-700 hover:border-blue-700 text-gray-400 hover:text-blue-300 px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap">
+                  Ver Respostas
+                </button>
+              )}
+            </div>
+          );
+        })
+      : answers[dev]._savedAt
+        ? <p className="text-gray-600 text-xs">💾 Salvo em: <span className="text-gray-400">{new Date(answers[dev]._savedAt).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}</span></p>
+        : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
+    }
+  </div>
+)}
+
+
                     {answers[dev]?.["_systems"]?.length > 0 && (
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {answers[dev]["_systems"].map(s => <span key={s} className="text-xs bg-blue-950 text-blue-400 border border-blue-900 rounded-full px-2 py-0.5">{s}</span>)}
