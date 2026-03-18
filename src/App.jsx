@@ -875,7 +875,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                         : <span className="text-xs bg-gray-800 border border-gray-700 text-gray-500 px-2 py-0.5 rounded-full">⏳ Pendente</span>}
                     </div>
                     <p className="text-gray-500 text-xs">Código: <span className="text-gray-300 font-mono font-bold tracking-widest">{genCode(dev)}</span></p>
-
+{/* 
 {answers[dev] && (
   <div className="mt-1 space-y-0.5">
     {answers[dev]._savedHistory?.length > 0
@@ -892,7 +892,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
         : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
     }
   </div>
-)}
+)} */}
 
 
 {answers[dev] && (
