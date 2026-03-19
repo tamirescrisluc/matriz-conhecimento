@@ -612,7 +612,7 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
     for (let i = 0; i < raw.length; i++) h = (Math.imul(31, h) + raw.charCodeAt(i)) | 0;
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let code = ""; let n = Math.abs(h);
-    for (let i = 0; i < 6; i++) { code += chars[n % chars.length]; n = Math.floor(n / chars.length); }
+    for (let i = 0; i < 8; i++) { code += chars[n % chars.length]; n = Math.floor(n / chars.length); }
     await supabase.from('dev_codes').upsert({ dev: v, code });
     onUpdateConfig({ ...config, devs: [...config.devs, v] });
     setNewDev("");
