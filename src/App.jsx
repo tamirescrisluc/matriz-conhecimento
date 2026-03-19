@@ -509,7 +509,7 @@ function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAcce
 
   function tryCode() {
     const trimmed = code.trim().toLowerCase();
-    const entry = Object.entries(devCodes).find(([, c]) => c.toLowerCase().startsWith(trimmed) && trimmed.length >= 8);
+    const entry = Object.entries(devCodes).find(([, c]) => c.toLowerCase() === trimmed);
     const devByBank = entry ? entry[0] : null;
     // fallback: procura dev pelo código antigo (hash simples) caso não esteja no banco
     const dev = devByBank || config.devs.find(d => {
