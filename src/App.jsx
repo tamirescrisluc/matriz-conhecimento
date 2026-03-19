@@ -900,7 +900,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
   <div className="mt-1 space-y-1">
     {answers[dev]._savedHistory?.length > 0
       ? [...answers[dev]._savedHistory].reverse().map((ts, i) => {
-          const snap = history[dev]?.find(s => s.timestamp === ts);
+          const snap = history[dev]?.find(s => new Date(s.timestamp).toISOString() === new Date(ts).toISOString());
           return (
             <div key={i} className="flex items-center gap-2">
               <p className="text-xs">
