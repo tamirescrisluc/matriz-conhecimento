@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from './supabase';
 
 const DEFAULT_PASS = "513122";
 
@@ -1209,7 +1210,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
+ /* useEffect(() => {
   try {
     const cfg  = localStorage.getItem("bft:config");
     const ans  = localStorage.getItem("bft:answers");
@@ -1249,8 +1250,95 @@ async function saveDevAnswers(dev, ans) {
   }
   setAnswers(next);
   localStorage.setItem("bft:answers", JSON.stringify(next));
+*/
 
-  // Salva snapshot no histórico
+useEffect(() => {
+  async function load() {
+    try {
+      const [{ data: cfgData }, { data: ansData }, { data: histData }] = await Promise.all([
+        supabase.from('config').select('data').eq('id', 'main').single(),
+        supabase.from('answers').select('dev, data'),
+        supabase.from('history').select('*').order('timestamp', { ascending: true }),
+      ]);
+
+      if (cfgData) setConfig(cfgData.data);
+
+      if (ansData) {
+        const ans = {};
+        ansData.forEach(row => { ans[row.dev] = row.data; });
+        setAnswers(ans);
+      }
+
+      if (histData) {
+        const hist = {};
+        histData.forEach(row => {
+          if (!hist[row.dev]) hist[row.dev] = [];
+          hist[row.dev].push({
+            timestamp: row.timestamp,
+            systems: row.systems,
+            answers: row.answers,
+          });
+        });
+        setHistory(hist);
+      }
+    } catch(e) { console.error(e); }
+    setLoaded(true);
+  }
+  load();
+}, []);
+
+async function saveConfig(cfg) {
+  setConfig(cfg);
+  await supabase.from('config').upsert({ id: 'main', data: cfg });
+}
+
+async function saveAnswers(ans) {
+  setAnswers(ans);
+}
+
+async function savePass(p) {
+  setManagerPass(p);
+  const cfg = { ...config, managerPass: p };
+  await supabase.from('config').upsert({ id: 'main', data: cfg });
+}
+
+async function saveHistory(hist) {
+  setHistory(hist);
+}
+
+async function saveDevAnswers(dev, ans) {
+  const next = { ...answers };
+  if (ans === null) {
+    delete next[dev];
+    setAnswers(next);
+    await supabase.from('answers').delete().eq('dev', dev);
+  } else {
+    next[dev] = ans;
+    setAnswers(next);
+    await supabase.from('answers').upsert({ dev, data: ans });
+
+    // Salva snapshot no histórico
+    const timestamp = ans._savedAt;
+    await supabase.from('history').insert({
+      dev,
+      timestamp,
+      systems: ans._systems || [],
+      answers: Object.fromEntries(
+        Object.entries(ans).filter(([k]) => !['_systems','_savedAt','_savedHistory'].includes(k))
+      ),
+    });
+
+    // Atualiza estado do histórico
+    const hist = { ...history };
+    if (!hist[dev]) hist[dev] = [];
+    hist[dev].push({ timestamp, systems: ans._systems || [], answers: ans });
+    setHistory(hist);
+  }
+}
+
+
+
+  /*// Salva snapshot no histórico
   if (ans !== null) {
     const raw = localStorage.getItem("bft:history");
     const hist = raw ? JSON.parse(raw) : {};
@@ -1262,10 +1350,9 @@ async function saveDevAnswers(dev, ans) {
         Object.entries(ans).filter(([k]) => k !== "_systems" && k !== "_savedAt" && k !== "_savedHistory")
       ),
     });
-    setHistory(hist);
-    localStorage.setItem("bft:history", JSON.stringify(hist));
+
   }
-}
+})*/
   if (!loaded) return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
       <p className="text-gray-500 text-sm animate-pulse">Carregando...</p>
