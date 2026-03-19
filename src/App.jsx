@@ -20,7 +20,6 @@ const LEVEL_BG = [
 ];
 
 const LEVEL_COLORS = ["#6b7280","#dc2626","#eab308","#16a34a","#3b82f6"];
-
 const DEFAULT_SYSTEMS = [];
 
 const SEED_MODULES = [
@@ -127,12 +126,6 @@ const SEED_MODULES = [
   ]},
 ];
 
-function genCode(dev) {
-  let h = 0;
-  for (let i = 0; i < dev.length; i++) h = (Math.imul(31, h) + dev.charCodeAt(i)) | 0;
-  return (Math.abs(h) % 90000 + 10000).toString();
-}
-
 function copyText(text) {
   try {
     const el = document.createElement("textarea");
@@ -172,11 +165,7 @@ function Tag({ label, onRemove }) {
 // ── System Selection Step ─────────────────────────────────────
 function SystemSelectionStep({ dev, systems, initialSelected, onConfirm }) {
   const [selected, setSelected] = useState(initialSelected || []);
-
-  function toggle(s) {
-    setSelected(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
-  }
-
+  function toggle(s) { setSelected(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]); }
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4" style={{ fontFamily: "system-ui,sans-serif" }}>
       <div className="w-full max-w-md space-y-6">
@@ -187,13 +176,11 @@ function SystemSelectionStep({ dev, systems, initialSelected, onConfirm }) {
           </div>
           <p className="text-gray-400 text-sm mt-3">Olá, <span className="text-blue-400 font-semibold">{dev}</span>!</p>
         </div>
-
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
           <div>
             <h2 className="text-white font-semibold text-sm mb-1">🖥️ Com quais sistemas você trabalha?</h2>
-            <p className="text-gray-500 text-xs leading-relaxed">Selecione todos os sistemas com os quais você tem ou já teve experiência. Isso nos ajuda a contextualizar melhor o seu perfil.</p>
+            <p className="text-gray-500 text-xs leading-relaxed">Selecione todos os sistemas com os quais você tem ou já teve experiência.</p>
           </div>
-
           <div className="space-y-2">
             {systems.map(s => {
               const active = selected.includes(s);
@@ -208,14 +195,8 @@ function SystemSelectionStep({ dev, systems, initialSelected, onConfirm }) {
               );
             })}
           </div>
-
-          {systems.length === 0 && (
-            <p className="text-gray-600 text-xs text-center">Nenhum sistema cadastrado. Continue assim mesmo.</p>
-          )}
-
-          <button
-            onClick={() => onConfirm(selected)}
-            disabled={systems.length > 0 && selected.length === 0}
+          {systems.length === 0 && <p className="text-gray-600 text-xs text-center">Nenhum sistema cadastrado. Continue assim mesmo.</p>}
+          <button onClick={() => onConfirm(selected)} disabled={systems.length > 0 && selected.length === 0}
             className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed py-3 rounded-xl font-semibold text-sm text-white transition-colors">
             Continuar para avaliação →
           </button>
@@ -224,6 +205,7 @@ function SystemSelectionStep({ dev, systems, initialSelected, onConfirm }) {
     </div>
   );
 }
+
 // ── Snapshot View ─────────────────────────────────────────────
 function SnapshotView({ dev, snapshot, config, onBack }) {
   const rows = [];
@@ -232,7 +214,6 @@ function SnapshotView({ dev, snapshot, config, onBack }) {
     else mod.submodules.forEach(sub => rows.push({ mod: mod.name, sub: sub.name, key: sub.id }));
   }
   const date = new Date(snapshot.timestamp).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
-
   return (
     <div className="min-h-screen bg-white text-gray-900 p-8" style={{ fontFamily: "system-ui,sans-serif" }}>
       <div className="max-w-3xl mx-auto">
@@ -248,7 +229,6 @@ function SnapshotView({ dev, snapshot, config, onBack }) {
           </div>
           <button onClick={onBack} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg transition-colors">← Voltar</button>
         </div>
-
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "24px" }}>
           <thead>
             <tr style={{ background: "#1e293b" }}>
@@ -280,19 +260,14 @@ function SnapshotView({ dev, snapshot, config, onBack }) {
   );
 }
 
-
-
-
 // ── Report View ───────────────────────────────────────────────
 function ReportView({ dev, config, devAnswers, onBack }) {
   const [exporting, setExporting] = useState(false);
-
   const rows = [];
   for (const mod of config.modules) {
     if (mod.submodules.length === 0) rows.push({ mod: mod.name, sub: null, key: mod.id });
     else mod.submodules.forEach(sub => rows.push({ mod: mod.name, sub: sub.name, key: sub.id }));
   }
-
   const selectedSystems = devAnswers["_systems"] || [];
 
   function exportHTML() {
@@ -309,13 +284,10 @@ function ReportView({ dev, config, devAnswers, onBack }) {
         </td>
       </tr>`;
     }).join("");
-
     const systemsBadges = selectedSystems.length > 0
       ? `<div style="margin-bottom:20px"><p style="font-size:12px;color:#374151;margin-bottom:6px;font-weight:600">Sistemas declarados:</p><div style="display:flex;gap:8px;flex-wrap:wrap">${selectedSystems.map(s => `<span style="background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:600">${s}</span>`).join("")}</div></div>`
       : "";
-
-    const html = `<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"/><title>Relatório – ${dev}</title>
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/><title>Relatório – ${dev}</title>
 <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;background:#fff;color:#111;padding:40px}h1{font-size:20px;font-weight:700;color:#111}.sub{font-size:13px;color:#6b7280;margin-top:4px}.date{font-size:11px;color:#9ca3af;margin-top:2px}.info{background:#eff6ff;border-left:4px solid #3b82f6;padding:12px 16px;border-radius:4px;margin:20px 0;font-size:12px;color:#1e40af;line-height:1.6}table{width:100%;border-collapse:collapse;margin-bottom:24px}thead tr{background:#1e293b}thead th{padding:10px 12px;color:#fff;font-size:12px;font-weight:600;text-align:left}thead th:last-child{text-align:center}footer{text-align:center;font-size:11px;color:#9ca3af;margin-top:16px}@media print{body{padding:20px}@page{margin:1.5cm}}</style>
 </head><body>
   <h1>🧠 Matriz de Conhecimento</h1>
@@ -323,14 +295,10 @@ function ReportView({ dev, config, devAnswers, onBack }) {
   <p class="date">${date}</p>
   <div class="info">Esta avaliação considera tanto o <strong>entendimento do processo de negócio</strong> quanto o <strong>domínio técnico</strong>. Níveis de <strong>0 – Nenhum</strong> a <strong>4 – Expert</strong>.</div>
   ${systemsBadges}
-  <table>
-    <thead><tr><th>Processo</th><th>Subprocesso</th><th style="text-align:center">Nível</th></tr></thead>
-    <tbody>${tableRows}</tbody>
-  </table>
+  <table><thead><tr><th>Processo</th><th>Subprocesso</th><th style="text-align:center">Nível</th></tr></thead><tbody>${tableRows}</tbody></table>
   <footer>Bus Factor Tracker · Documento gerado automaticamente</footer>
   <script>window.onload=function(){window.print();setTimeout(()=>window.close(),1000)};</script>
 </body></html>`;
-
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -356,22 +324,17 @@ function ReportView({ dev, config, devAnswers, onBack }) {
             <button onClick={onBack} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg transition-colors">← Voltar</button>
           </div>
         </div>
-
         <div style={{ background: "#eff6ff", borderLeft: "4px solid #3b82f6", padding: "12px 16px", borderRadius: "4px", marginBottom: "24px", fontSize: "12px", color: "#1e40af", lineHeight: "1.6" }}>
           Esta avaliação considera tanto o <strong>entendimento do processo de negócio</strong> quanto o <strong>domínio técnico</strong>. Níveis de <strong>0 – Nenhum</strong> a <strong>4 – Expert</strong>.
         </div>
-
         {selectedSystems.length > 0 && (
           <div className="mb-5">
             <p className="text-xs text-gray-500 font-semibold mb-2">Sistemas declarados:</p>
             <div className="flex flex-wrap gap-2">
-              {selectedSystems.map(s => (
-                <span key={s} className="bg-blue-100 text-blue-700 text-xs font-semibold rounded-full px-3 py-1">{s}</span>
-              ))}
+              {selectedSystems.map(s => <span key={s} className="bg-blue-100 text-blue-700 text-xs font-semibold rounded-full px-3 py-1">{s}</span>)}
             </div>
           </div>
         )}
-
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "24px" }}>
           <thead>
             <tr style={{ background: "#1e293b" }}>
@@ -405,30 +368,26 @@ function ReportView({ dev, config, devAnswers, onBack }) {
 
 // ── Dev Fill View ─────────────────────────────────────────────
 function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
-  const [step, setStep] = useState("systems"); // "systems" | "modules"
+  const [step, setStep] = useState("systems");
   const [selectedSystems, setSelectedSystems] = useState(initialAnswers?.["_systems"] || []);
   const [devAnswers, setDevAnswers] = useState(initialAnswers || {});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [showReport, setShowReport] = useState(false);
-
   const systems = config.systems || DEFAULT_SYSTEMS;
 
-  function handleSystemsConfirm(sel) {
-    setSelectedSystems(sel);
-    setStep("modules");
-  }
-
+  function handleSystemsConfirm(sel) { setSelectedSystems(sel); setStep("modules"); }
   function setLevel(key, val) { setDevAnswers(p => ({ ...p, [key]: val })); setSaved(false); }
 
   async function submit() {
     setSaving(true);
     const prevHistory = initialAnswers?._savedHistory || [];
+    const now = new Date().toISOString();
     const allAnswers = {
       _systems: selectedSystems,
-      _savedAt: new Date().toISOString(),
-      _savedHistory: [...prevHistory, new Date().toISOString()],
+      _savedAt: now,
+      _savedHistory: [...prevHistory, now],
     };
     for (const mod of config.modules) {
       if (mod.submodules.length === 0) allAnswers[mod.id] = devAnswers[mod.id] ?? 0;
@@ -449,17 +408,7 @@ function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
   }
 
   if (showReport) return <ReportView dev={dev} config={config} devAnswers={devAnswers} onBack={() => setShowReport(false)} />;
-
-  if (step === "systems") {
-    return (
-      <SystemSelectionStep
-        dev={dev}
-        systems={systems}
-        initialSelected={selectedSystems}
-        onConfirm={handleSystemsConfirm}
-      />
-    );
-  }
+  if (step === "systems") return <SystemSelectionStep dev={dev} systems={systems} initialSelected={selectedSystems} onConfirm={handleSystemsConfirm} />;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-36" style={{ fontFamily: "system-ui,sans-serif" }}>
@@ -478,7 +427,6 @@ function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
           {onLogout && <button onClick={onLogout} className="text-gray-500 hover:text-gray-300 text-xs transition-colors">Sair</button>}
         </div>
       </div>
-
       <div className="p-6 max-w-3xl mx-auto space-y-6">
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3">
           <h2 className="text-white font-semibold text-sm">📋 Antes de começar, leia com atenção</h2>
@@ -489,7 +437,6 @@ function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
             O objetivo <span className="text-white font-medium">não</span> é avaliar desempenho individual, mas identificar riscos e oportunidades de compartilhamento de conhecimento no time.
           </p>
         </div>
-
         {config.modules.length === 0
           ? <p className="text-gray-500 text-sm">Nenhum módulo cadastrado ainda.</p>
           : (
@@ -517,7 +464,6 @@ function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
           )
         }
       </div>
-
       {config.modules.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 px-4 py-3 z-50">
           <div className="max-w-3xl mx-auto flex gap-2">
@@ -550,7 +496,7 @@ function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
 }
 
 // ── Entry Screen ──────────────────────────────────────────────
-function EntryScreen({ config, managerPass, onDevAccess, onManagerAccess, onChangePass }) {
+function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAccess, onChangePass }) {
   const [screen, setScreen] = useState("dev");
   const [code, setCode] = useState("");
   const [codeErr, setCodeErr] = useState("");
@@ -562,10 +508,19 @@ function EntryScreen({ config, managerPass, onDevAccess, onManagerAccess, onChan
   const [changeMsg, setChangeMsg] = useState(null);
 
   function tryCode() {
-    const dev = config.devs.find(d => genCode(d) === code.trim());
+    const trimmed = code.trim().toLowerCase();
+    const entry = Object.entries(devCodes).find(([, c]) => c.toLowerCase().startsWith(trimmed) && trimmed.length >= 8);
+    const devByBank = entry ? entry[0] : null;
+    // fallback: procura dev pelo código antigo (hash simples) caso não esteja no banco
+    const dev = devByBank || config.devs.find(d => {
+      let h = 0;
+      for (let i = 0; i < d.length; i++) h = (Math.imul(31, h) + d.charCodeAt(i)) | 0;
+      return (Math.abs(h) % 90000 + 10000).toString() === code.trim();
+    });
     if (dev) onDevAccess(dev);
     else { setCodeErr("Código inválido. Verifique com seu gestor."); setTimeout(() => setCodeErr(""), 2500); }
   }
+
   function tryManager() {
     if (pass === managerPass) onManagerAccess();
     else { setPassErr("Senha incorreta."); setTimeout(() => setPassErr(""), 2500); }
@@ -591,19 +546,17 @@ function EntryScreen({ config, managerPass, onDevAccess, onManagerAccess, onChan
           <h1 className="text-2xl font-bold text-white mt-4">Matriz de Conhecimento</h1>
           <p className="text-gray-500 text-sm mt-1">Bus Factor Tracker</p>
         </div>
-
         {screen === "dev" && (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
             <p className="text-gray-300 text-sm text-center">Digite seu código de acesso:</p>
             <input value={code} onChange={e => setCode(e.target.value)} onKeyDown={e => e.key === "Enter" && tryCode()}
-              placeholder="Ex: 47382" autoFocus
-              className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-center font-mono text-lg tracking-widest focus:outline-none placeholder-gray-600 ${codeErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
+              placeholder="Cole seu código aqui" autoFocus
+              className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-center font-mono text-sm tracking-wider focus:outline-none placeholder-gray-600 ${codeErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
             {codeErr && <p className="text-red-400 text-xs text-center">{codeErr}</p>}
             <button onClick={tryCode} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Acessar</button>
             <button onClick={() => reset("manager")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">Acesso de gestor</button>
           </div>
         )}
-
         {screen === "manager" && (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
             <p className="text-gray-300 text-sm text-center font-semibold">Acesso de Gestor</p>
@@ -616,7 +569,6 @@ function EntryScreen({ config, managerPass, onDevAccess, onManagerAccess, onChan
             <button onClick={() => reset("dev")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
           </div>
         )}
-
         {screen === "changepass" && (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
             <p className="text-gray-300 text-sm text-center font-semibold">🔐 Alterar Senha do Gestor</p>
@@ -639,7 +591,7 @@ function EntryScreen({ config, managerPass, onDevAccess, onManagerAccess, onChan
 }
 
 // ── Manager View ──────────────────────────────────────────────
-function ManagerView({ config, answers, history, managerPass, onChangePass, onUpdateConfig, onUpdateAnswers, onUpdateHistory, onSaveDevAnswers, onLogout }) {
+function ManagerView({ config, answers, history, devCodes, managerPass, onChangePass, onUpdateConfig, onUpdateAnswers, onUpdateHistory, onSaveDevAnswers, onLogout }) {
   const [tab, setTab] = useState("admin");
   const [newDev, setNewDev] = useState("");
   const [newMod, setNewMod] = useState("");
@@ -649,16 +601,27 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
   const [previewDev, setPreviewDev] = useState("");
   const [previewMode, setPreviewMode] = useState(false);
   const [viewSnapshot, setViewSnapshot] = useState(null);
-
   const systems = config.systems || DEFAULT_SYSTEMS;
 
-  function addDev() {
-    const v = newDev.trim(); if (!v || config.devs.includes(v)) return;
-    onUpdateConfig({ ...config, devs: [...config.devs, v] }); setNewDev("");
+  async function addDev() {
+    const v = newDev.trim();
+    if (!v || config.devs.includes(v)) return;
+    // Gera código único baseado em nome + timestamp e salva no banco
+    const raw = v + Date.now().toString();
+    let h = 0;
+    for (let i = 0; i < raw.length; i++) h = (Math.imul(31, h) + raw.charCodeAt(i)) | 0;
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = ""; let n = Math.abs(h);
+    for (let i = 0; i < 8; i++) { code += chars[n % chars.length]; n = Math.floor(n / chars.length); }
+    await supabase.from('dev_codes').upsert({ dev: v, code });
+    onUpdateConfig({ ...config, devs: [...config.devs, v] });
+    setNewDev("");
   }
+
   function removeDev(dev) {
     const ans = { ...answers }; delete ans[dev]; onUpdateAnswers(ans);
     onUpdateConfig({ ...config, devs: config.devs.filter(d => d !== dev) });
+    supabase.from('dev_codes').delete().eq('dev', dev);
   }
   function addMod() {
     const v = newMod.trim(); if (!v) return;
@@ -681,7 +644,8 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
   function removeSystem(s) { onUpdateConfig({ ...config, systems: systems.filter(x => x !== s) }); }
 
   function handleCopy(dev) {
-    copyText(`Olá ${dev}! Seu código de acesso para a Matriz de Conhecimento é: *${genCode(dev)}*`);
+    const code = devCodes[dev] || "";
+    copyText(`Olá ${dev}! Seu código de acesso para a Matriz de Conhecimento é: *${code}*`);
     setCopiedDev(dev); setTimeout(() => setCopiedDev(null), 2000);
   }
 
@@ -700,19 +664,9 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
   function busFactor(key) { return config.devs.filter(d => (answers[d]?.[key] ?? 0) >= 2).length; }
   function bfColor(n) { if (n <= 1) return "#ef4444"; if (n === 2) return "#eab308"; return "#22c55e"; }
 
-  if (viewSnapshot) {
-  return <SnapshotView dev={viewSnapshot.dev} snapshot={viewSnapshot.snapshot} config={config} onBack={() => setViewSnapshot(null)} />;
-  }
-
+  if (viewSnapshot) return <SnapshotView dev={viewSnapshot.dev} snapshot={viewSnapshot.snapshot} config={config} onBack={() => setViewSnapshot(null)} />;
   if (previewMode && previewDev) {
-    return (
-      <DevFillView
-        dev={previewDev} config={config}
-        initialAnswers={answers[previewDev] || {}}
-        onSave={onSaveDevAnswers}
-        onLogout={() => setPreviewMode(false)}
-      />
-    );
+    return <DevFillView dev={previewDev} config={config} initialAnswers={answers[previewDev] || {}} onSave={onSaveDevAnswers} onLogout={() => setPreviewMode(false)} />;
   }
 
   return (
@@ -739,8 +693,6 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
         {/* ── ADMIN TAB ── */}
         {tab === "admin" && (
           <div className="space-y-10">
-
-            {/* Sistemas */}
             <section>
               <h2 className="text-base font-semibold text-gray-200 mb-1">🖥️ Sistemas</h2>
               <p className="text-gray-500 text-xs mb-4">Estes são os sistemas exibidos na pergunta inicial do formulário do dev.</p>
@@ -751,13 +703,11 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                 <button onClick={addSystem} className="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-lg text-sm font-semibold text-white">+ Adicionar</button>
               </div>
               <div className="flex flex-wrap gap-2 min-h-8">
-                {systems.length === 0
-                  ? <p className="text-gray-600 text-sm">Nenhum sistema cadastrado.</p>
+                {systems.length === 0 ? <p className="text-gray-600 text-sm">Nenhum sistema cadastrado.</p>
                   : systems.map(s => <Tag key={s} label={s} onRemove={() => removeSystem(s)} />)}
               </div>
             </section>
 
-            {/* Devs */}
             <section>
               <h2 className="text-base font-semibold text-gray-200 mb-4">👥 Desenvolvedores</h2>
               <div className="flex gap-2 mb-3">
@@ -767,13 +717,11 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                 <button onClick={addDev} className="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-lg text-sm font-semibold text-white">+ Adicionar</button>
               </div>
               <div className="flex flex-wrap gap-2 min-h-8">
-                {config.devs.length === 0
-                  ? <p className="text-gray-600 text-sm">Nenhum desenvolvedor ainda.</p>
+                {config.devs.length === 0 ? <p className="text-gray-600 text-sm">Nenhum desenvolvedor ainda.</p>
                   : config.devs.map(d => <Tag key={d} label={d} onRemove={() => removeDev(d)} />)}
               </div>
             </section>
 
-            {/* Módulos */}
             <section>
               <h2 className="text-base font-semibold text-gray-200 mb-4">📦 Processos e Subprocessos</h2>
               {config.modules.length === 0 && <p className="text-gray-600 text-sm mb-3">Nenhum processo adicionado ainda.</p>}
@@ -818,13 +766,11 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
               )}
             </section>
 
-            {/* Backup */}
             <section>
               <h2 className="text-base font-semibold text-gray-200 mb-1">💾 Backup de Dados</h2>
               <p className="text-gray-500 text-xs mb-4">Exporte um arquivo JSON com todos os dados e importe quando precisar restaurar.</p>
               <div className="flex gap-3">
-                <button
-                  onClick={() => {
+                <button onClick={() => {
                     const payload = JSON.stringify({ config, answers, history, managerPass }, null, 2);
                     const blob = new Blob([payload], { type: "application/json" });
                     const url = URL.createObjectURL(blob);
@@ -875,58 +821,35 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                         ? <span className="text-xs bg-green-950 border border-green-800 text-green-400 px-2 py-0.5 rounded-full">✅ Preenchido</span>
                         : <span className="text-xs bg-gray-800 border border-gray-700 text-gray-500 px-2 py-0.5 rounded-full">⏳ Pendente</span>}
                     </div>
-                    <p className="text-gray-500 text-xs">Código: <span className="text-gray-300 font-mono font-bold tracking-widest">{genCode(dev)}</span></p>
-{/* 
-{answers[dev] && (
-  <div className="mt-1 space-y-0.5">
-    {answers[dev]._savedHistory?.length > 0
-      ? [...answers[dev]._savedHistory].reverse().map((ts, i) => (
-          <p key={i} className="text-xs">
-            <span className="text-gray-600">{i === 0 ? "💾 Último save:" : "   └"}</span>{" "}
-            <span className={i === 0 ? "text-gray-400" : "text-gray-600"}>
-              {new Date(ts).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}
-            </span>
-          </p>
-        ))
-      : answers[dev]._savedAt
-        ? <p className="text-gray-600 text-xs">💾 Salvo em: <span className="text-gray-400">{new Date(answers[dev]._savedAt).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}</span></p>
-        : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
-    }
-  </div>
-)} */}
-
-
-{answers[dev] && (
-  <div className="mt-1 space-y-1">
-    {answers[dev]._savedHistory?.length > 0
-      ? [...answers[dev]._savedHistory].reverse().map((ts, i) => {
-          const snap = history[dev]?.find(s => Math.abs(new Date(s.timestamp) - new Date(ts)) < 5000);
-          return (
-            <div key={i} className="flex items-center gap-2">
-              <p className="text-xs">
-                <span className="text-gray-600">{i === 0 ? "💾 Último save:" : "   └"}</span>{" "}
-                <span className={i === 0 ? "text-gray-400" : "text-gray-600"}>
-                  {new Date(ts).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}
-                </span>
-              </p>
-              {snap && (
-              <button
-              onClick={() => setViewSnapshot({ dev, snapshot: snap })}
-              className="text-xs bg-gray-800 hover:bg-orange-950 border border-orange-600 hover:border-orange-400 text-orange-400 hover:text-orange-300 px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap">
-             Ver Respostas
-            </button>
-              )}
-            </div>
-          );
-        })
-      : answers[dev]._savedAt
-        ? <p className="text-gray-600 text-xs">💾 Salvo em: <span className="text-gray-400">{new Date(answers[dev]._savedAt).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}</span></p>
-        : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
-    }
-  </div>
-)}
-
-
+                    <p className="text-gray-500 text-xs">Código: <span className="text-gray-300 font-mono font-bold tracking-widest">{devCodes[dev] || "—"}</span></p>
+                    {answers[dev] && (
+                      <div className="mt-1 space-y-1">
+                        {answers[dev]._savedHistory?.length > 0
+                          ? [...answers[dev]._savedHistory].reverse().map((ts, i) => {
+                              const snap = history[dev]?.find(s => Math.abs(new Date(s.timestamp) - new Date(ts)) < 5000);
+                              return (
+                                <div key={i} className="flex items-center gap-2">
+                                  <p className="text-xs">
+                                    <span className="text-gray-600">{i === 0 ? "💾 Último save:" : "   └"}</span>{" "}
+                                    <span className={i === 0 ? "text-gray-400" : "text-gray-600"}>
+                                      {new Date(ts).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}
+                                    </span>
+                                  </p>
+                                  {snap && (
+                                    <button onClick={() => setViewSnapshot({ dev, snapshot: snap })}
+                                      className="text-xs bg-gray-800 hover:bg-orange-950 border border-orange-600 hover:border-orange-400 text-orange-400 hover:text-orange-300 px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap">
+                                      Ver Respostas
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })
+                          : answers[dev]._savedAt
+                            ? <p className="text-gray-600 text-xs">💾 Salvo em: <span className="text-gray-400">{new Date(answers[dev]._savedAt).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })}</span></p>
+                            : <p className="text-gray-700 text-xs italic">Salve novamente para registrar a data</p>
+                        }
+                      </div>
+                    )}
                     {answers[dev]?.["_systems"]?.length > 0 && (
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {answers[dev]["_systems"].map(s => <span key={s} className="text-xs bg-blue-950 text-blue-400 border border-blue-900 rounded-full px-2 py-0.5">{s}</span>)}
@@ -968,113 +891,6 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
           </div>
         )}
 
-        {/* ── HISTÓRICO DO DEV TAB ── */}
-        {tab === "histdev" && (() => {
-                        const devs = Object.keys(history).filter(d => history[d]?.length > 0);
-          const allMods = [];
-          for (const mod of config.modules) {
-            if (mod.submodules.length === 0) allMods.push({ key: mod.id, label: mod.name });
-            else mod.submodules.forEach(sub => allMods.push({ key: sub.id, label: `${mod.name} › ${sub.name}` }));
-          }
-
-          return (
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-base font-semibold text-gray-200">📈 Histórico do Dev</h2>
-                <p className="text-gray-500 text-xs mt-0.5">Snapshots salvos a cada submissão — base para análise de evolução.</p>
-              </div>
-
-              {devs.length === 0 && (
-                <p className="text-gray-500 text-sm">Nenhum histórico registrado ainda. Os snapshots aparecem aqui após o primeiro salvamento de cada dev.</p>
-              )}
-
-              {devs.map(dev => {
-                const snaps = [...(history[dev] || [])].reverse();
-                return (
-                  <div key={dev} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-                    {/* Dev header */}
-                    <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
-                      <div>
-                        <p className="text-white font-semibold text-sm">{dev}</p>
-                        <p className="text-gray-500 text-xs mt-0.5">{snaps.length} snapshot{snaps.length !== 1 ? "s" : ""} registrado{snaps.length !== 1 ? "s" : ""}</p>
-                      </div>
-                      <span className="text-xs bg-blue-950 border border-blue-800 text-blue-400 px-3 py-1 rounded-full">
-                        {snaps.length} entradas
-                      </span>
-                    </div>
-
-                    {/* Snapshots */}
-                    <div className="divide-y divide-gray-800">
-                      {snaps.map((snap, si) => {
-                        const date = new Date(snap.timestamp).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-                        const total = allMods.length;
-                        const avg = total > 0
-                          ? (allMods.reduce((s, m) => s + (snap.answers[m.key] ?? 0), 0) / total).toFixed(1)
-                          : "—";
-                        const filled = allMods.filter(m => (snap.answers[m.key] ?? 0) > 0).length;
-
-                        return (
-                          <details key={si} className="group">
-                            <summary className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-gray-800 transition-colors list-none">
-                              <div className="flex items-center gap-3">
-                                <span className="text-gray-600 text-xs font-mono">#{snaps.length - si}</span>
-                                <div>
-                                  <p className="text-gray-300 text-sm font-medium">{date}</p>
-                                  {snap.systems?.length > 0 && (
-                                    <div className="flex gap-1 mt-0.5 flex-wrap">
-                                      {snap.systems.map(s => <span key={s} className="text-xs bg-blue-950 text-blue-400 border border-blue-900 rounded-full px-2 py-0.5">{s}</span>)}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-4 shrink-0">
-                                <div className="text-right">
-                                  <p className="text-xs text-gray-500">Média geral</p>
-                                  <p className="text-sm font-bold" style={{ color: LEVEL_COLORS[Math.round(parseFloat(avg))] ?? "#6b7280" }}>{avg}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-xs text-gray-500">Itens avaliados</p>
-                                  <p className="text-sm font-bold text-gray-300">{filled}/{total}</p>
-                                </div>
-                                <span className="text-gray-600 group-open:rotate-90 transition-transform text-xs">▶</span>
-                              </div>
-                            </summary>
-
-                            {/* Detail table */}
-                            <div className="px-5 pb-4 pt-2 overflow-x-auto">
-                              <table className="w-full text-xs border-collapse">
-                                <thead>
-                                  <tr className="bg-gray-800">
-                                    <th className="text-left px-3 py-2 text-gray-400 font-semibold rounded-tl-lg">Processo / Subprocesso</th>
-                                    <th className="text-center px-3 py-2 text-gray-400 font-semibold rounded-tr-lg">Nível</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {allMods.map((m, mi) => {
-                                    const lvl = snap.answers[m.key] ?? 0;
-                                    return (
-                                      <tr key={m.key} style={{ background: mi % 2 === 0 ? "#111827" : "#0f172a" }}>
-                                        <td className="px-3 py-1.5 text-gray-400">{m.label}</td>
-                                        <td className="px-3 py-1.5 text-center">
-                                          <span style={{ display: "inline-block", background: LEVEL_COLORS[lvl], color: "#fff", fontWeight: 700, borderRadius: 4, padding: "1px 8px", minWidth: 20 }}>{lvl}</span>
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          </details>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
-
         {/* ── MATRIX TAB ── */}
         {tab === "matrix" && (
           <div>
@@ -1092,8 +908,7 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                     </span>
                   ))}
                 </div>
-                <button
-                  onClick={() => {
+                <button onClick={() => {
                     const headerCols = config.devs.map(d => {
                       const sys = answers[d]?.["_systems"] || [];
                       const badges = sys.map(s => `<span style="display:inline-block;background:#1e3a5f;color:#93c5fd;border-radius:20px;padding:1px 6px;font-size:9px;margin:1px">${s}</span>`).join("");
@@ -1133,7 +948,6 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                 </button>
               </div>
             </div>
-
             {config.devs.length === 0 || config.modules.length === 0
               ? <p className="text-gray-500 text-sm">Configure devs e módulos na aba Admin primeiro.</p>
               : (
@@ -1185,7 +999,6 @@ function ManagerView({ config, answers, history, managerPass, onChangePass, onUp
                 </div>
               )
             }
-
             <div className="mt-4 flex gap-4 flex-wrap">
               {[["🔴 Bus Factor 1","Risco crítico — apenas 1 pessoa domina"],["🟡 Bus Factor 2","Atenção — conhecimento concentrado"],["🟢 Bus Factor 3+","Saudável — conhecimento distribuído"]].map(([t,d]) => (
                 <div key={t} className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-xs">
@@ -1206,161 +1019,86 @@ export default function App() {
   const [config, setConfig] = useState({ devs: [], modules: [], systems: [...DEFAULT_SYSTEMS] });
   const [answers, setAnswers] = useState({});
   const [history, setHistory] = useState({});
+  const [devCodes, setDevCodes] = useState({});
   const [managerPass, setManagerPass] = useState(DEFAULT_PASS);
   const [session, setSession] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
- /* useEffect(() => {
-  try {
-    const cfg  = localStorage.getItem("bft:config");
-    const ans  = localStorage.getItem("bft:answers");
-    const pass = localStorage.getItem("bft:pass");
-    const hist = localStorage.getItem("bft:history");
-    if (cfg)  setConfig(JSON.parse(cfg));
-    if (ans)  setAnswers(JSON.parse(ans));
-    if (pass) setManagerPass(pass);
-    if (hist) setHistory(JSON.parse(hist));
-  } catch {}
-  setLoaded(true);
-}, []);
-
-async function saveConfig(cfg) {
-  setConfig(cfg);
-  localStorage.setItem("bft:config", JSON.stringify(cfg));
-}
-async function saveAnswers(ans) {
-  setAnswers(ans);
-  localStorage.setItem("bft:answers", JSON.stringify(ans));
-}
-async function savePass(p) {
-  setManagerPass(p);
-  localStorage.setItem("bft:pass", p);
-}
-async function saveHistory(hist) {
-  setHistory(hist);
-  localStorage.setItem("bft:history", JSON.stringify(hist));
-}
-async function saveDevAnswers(dev, ans) {
-  // Salva respostas atuais
-  const next = { ...answers };
-  if (ans === null) {
-    delete next[dev];
-  } else {
-    next[dev] = ans;
-  }
-  setAnswers(next);
-  localStorage.setItem("bft:answers", JSON.stringify(next));
-*/
-
-useEffect(() => {
-  async function load() {
-    try {
-      const [{ data: cfgData }, { data: ansData }, { data: histData }] = await Promise.all([
-        supabase.from('config').select('data').eq('id', 'main').single(),
-        supabase.from('answers').select('dev, data'),
-        supabase.from('history').select('*').order('timestamp', { ascending: true }),
-      ]);
-
-      if (cfgData) setConfig(cfgData.data);
-
-      if (ansData) {
-        const ans = {};
-        ansData.forEach(row => { ans[row.dev] = row.data; });
-        setAnswers(ans);
-      }
-
-      if (histData) {
-        const hist = {};
-        histData.forEach(row => {
-          if (!hist[row.dev]) hist[row.dev] = [];
-          hist[row.dev].push({
-            timestamp: row.timestamp,
-            systems: row.systems,
-            answers: row.answers,
+  useEffect(() => {
+    async function load() {
+      try {
+        const [{ data: cfgData }, { data: ansData }, { data: histData }, { data: codesData }] = await Promise.all([
+          supabase.from('config').select('data').eq('id', 'main').single(),
+          supabase.from('answers').select('dev, data'),
+          supabase.from('history').select('*').order('timestamp', { ascending: true }),
+          supabase.from('dev_codes').select('dev, code'),
+        ]);
+        if (cfgData) setConfig(cfgData.data);
+        if (ansData) {
+          const ans = {};
+          ansData.forEach(row => { ans[row.dev] = row.data; });
+          setAnswers(ans);
+        }
+        if (histData) {
+          const hist = {};
+          histData.forEach(row => {
+            if (!hist[row.dev]) hist[row.dev] = [];
+            hist[row.dev].push({ timestamp: row.timestamp, systems: row.systems, answers: row.answers });
           });
-        });
-        setHistory(hist);
-      }
-    } catch(e) { console.error(e); }
-    setLoaded(true);
+          setHistory(hist);
+        }
+        if (codesData) {
+          const codes = {};
+          codesData.forEach(row => { codes[row.dev] = row.code; });
+          setDevCodes(codes);
+        }
+      } catch(e) { console.error(e); }
+      setLoaded(true);
+    }
+    load();
+  }, []);
+
+  async function saveConfig(cfg) {
+    setConfig(cfg);
+    await supabase.from('config').upsert({ id: 'main', data: cfg });
   }
-  load();
-}, []);
-
-async function saveConfig(cfg) {
-  setConfig(cfg);
-  await supabase.from('config').upsert({ id: 'main', data: cfg });
-}
-
-async function saveAnswers(ans) {
-  setAnswers(ans);
-}
-
-async function savePass(p) {
-  setManagerPass(p);
-  const cfg = { ...config, managerPass: p };
-  await supabase.from('config').upsert({ id: 'main', data: cfg });
-}
-
-async function saveHistory(hist) {
-  setHistory(hist);
-}
-
-async function saveDevAnswers(dev, ans) {
-  const next = { ...answers };
-  if (ans === null) {
-    delete next[dev];
-    setAnswers(next);
-    await supabase.from('answers').delete().eq('dev', dev);
-  } else {
-    next[dev] = ans;
-    setAnswers(next);
-    await supabase.from('answers').upsert({ dev, data: ans });
-
-    // Salva snapshot no histórico
-    const timestamp = ans._savedAt;
-    await supabase.from('history').insert({
-      dev,
-      timestamp,
-      systems: ans._systems || [],
-      answers: Object.fromEntries(
-        Object.entries(ans).filter(([k]) => !['_systems','_savedAt','_savedHistory'].includes(k))
-      ),
-    });
-
-    // Atualiza estado do histórico
-    const hist = { ...history };
-    if (!hist[dev]) hist[dev] = [];
-    hist[dev].push({ timestamp, systems: ans._systems || [], answers: ans });
-    setHistory(hist);
+  async function saveAnswers(ans) { setAnswers(ans); }
+  async function savePass(p) {
+    setManagerPass(p);
+    await supabase.from('config').upsert({ id: 'main', data: { ...config, managerPass: p } });
   }
-}
+  async function saveHistory(hist) { setHistory(hist); }
 
-
-
-  /*// Salva snapshot no histórico
-  if (ans !== null) {
-    const raw = localStorage.getItem("bft:history");
-    const hist = raw ? JSON.parse(raw) : {};
-    if (!hist[dev]) hist[dev] = [];
-    hist[dev].push({
-    timestamp: ans._savedAt,
-      systems: ans["_systems"] || [],
-      answers: Object.fromEntries(
-        Object.entries(ans).filter(([k]) => k !== "_systems" && k !== "_savedAt" && k !== "_savedHistory")
-      ),
-    });
-
+  async function saveDevAnswers(dev, ans) {
+    const next = { ...answers };
+    if (ans === null) {
+      delete next[dev];
+      setAnswers(next);
+      await supabase.from('answers').delete().eq('dev', dev);
+    } else {
+      next[dev] = ans;
+      setAnswers(next);
+      await supabase.from('answers').upsert({ dev, data: ans });
+      const timestamp = ans._savedAt;
+      await supabase.from('history').insert({
+        dev, timestamp,
+        systems: ans._systems || [],
+        answers: Object.fromEntries(Object.entries(ans).filter(([k]) => !['_systems','_savedAt','_savedHistory'].includes(k))),
+      });
+      const hist = { ...history };
+      if (!hist[dev]) hist[dev] = [];
+      hist[dev].push({ timestamp, systems: ans._systems || [], answers: ans });
+      setHistory(hist);
+    }
   }
-})*/
+
   if (!loaded) return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
       <p className="text-gray-500 text-sm animate-pulse">Carregando...</p>
     </div>
   );
 
-  if (!session) return <EntryScreen config={config} managerPass={managerPass} onDevAccess={dev => setSession({ dev })} onManagerAccess={() => setSession("manager")} onChangePass={savePass} />;
-  if (session === "manager") return <ManagerView config={config} answers={answers} history={history} managerPass={managerPass} onChangePass={savePass} onUpdateConfig={saveConfig} onUpdateAnswers={saveAnswers} onUpdateHistory={saveHistory} onSaveDevAnswers={saveDevAnswers} onLogout={() => setSession(null)} />;
-
+  if (!session) return <EntryScreen config={config} devCodes={devCodes} managerPass={managerPass} onDevAccess={dev => setSession({ dev })} onManagerAccess={() => setSession("manager")} onChangePass={savePass} />;
+  if (session === "manager") return <ManagerView config={config} answers={answers} history={history} devCodes={devCodes} managerPass={managerPass} onChangePass={savePass} onUpdateConfig={saveConfig} onUpdateAnswers={saveAnswers} onUpdateHistory={saveHistory} onSaveDevAnswers={saveDevAnswers} onLogout={() => setSession(null)} />;
   return <DevFillView dev={session.dev} config={config} initialAnswers={answers[session.dev] || {}} onSave={saveDevAnswers} onLogout={() => setSession(null)} />;
 }
