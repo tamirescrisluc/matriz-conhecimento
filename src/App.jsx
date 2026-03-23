@@ -952,53 +952,59 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
               ? <p className="text-gray-500 text-sm">Configure devs e módulos na aba Admin primeiro.</p>
               : (
                 <div className="overflow-x-auto rounded-xl border border-gray-800">
-                  <table className="min-w-full text-xs" style={{ borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr className="bg-gray-900">
-                        <th className="text-left px-4 py-3 text-gray-400 font-semibold border-b border-r border-gray-800 whitespace-nowrap min-w-48">Processo / Subprocesso</th>
-                        {config.devs.map(d => (
-                          <th key={d} className="px-3 py-3 text-gray-300 font-semibold border-b border-r border-gray-800 whitespace-nowrap text-center">
-                            <div>{d}</div>
-                            {answers[d]?.["_systems"]?.length > 0 && (
-                              <div className="flex gap-1 justify-center mt-1 flex-wrap">
-                                {answers[d]["_systems"].map(s => <span key={s} className="text-blue-400 bg-blue-950 border border-blue-900 rounded-full px-1.5 py-0.5 text-xs font-normal">{s}</span>)}
-                              </div>
-                            )}
-                          </th>
-                        ))}
-                        <th className="px-3 py-3 text-gray-400 font-semibold border-b border-gray-800 whitespace-nowrap text-center">Bus Factor</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getRows().map((r, i) => {
-                        const bf = busFactor(r.key);
-                        return (
-                          <tr key={r.key} style={{ background: i % 2 === 0 ? "#111827" : "#0f172a" }}>
-                            <td className={`px-4 py-2 border-r border-gray-800 whitespace-nowrap ${r.header ? "text-blue-300 font-semibold" : r.indent ? "text-gray-400 pl-7" : "text-gray-300"}`}>
-                              {r.indent ? "↳ " : ""}{r.label}
-                            </td>
-                            {r.header
-                              ? config.devs.map(d => <td key={d} className="border-r border-gray-800 px-3 py-2 text-center text-gray-700">—</td>)
-                              : config.devs.map(d => {
-                                  const lvl = answers[d]?.[r.key] ?? 0;
-                                  return (
-                                    <td key={d} className="border-r border-gray-800 px-3 py-2 text-center">
-                                      <span style={{ display: "inline-block", background: LEVEL_COLORS[lvl], color: "#fff", borderRadius: 4, padding: "1px 8px", fontWeight: 700, minWidth: 24 }}>{lvl}</span>
-                                    </td>
-                                  );
-                                })
-                            }
-                            <td className="px-3 py-2 text-center">
-                              {!r.header && <span style={{ color: bfColor(bf), fontWeight: 700, fontSize: 13 }}>{bf}</span>}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )
+                  <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "75vh", borderRadius: "12px", border: "1px solid #1f2937" }}>
+                 <table style={{ borderCollapse: "collapse", fontSize: "12px", width: "max-content", minWidth: "100%" }}>
+                 <thead>
+                 <tr style={{ background: "#111827", position: "sticky", top: 0, zIndex: 10 }}>
+                 <th style={{ position: "sticky", left: 0, zIndex: 20, background: "#111827", padding: "10px 16px", textAlign: "left", color: "#9ca3af", fontWeight: 600, borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", whiteSpace: "nowrap", minWidth: "220px" }}>
+                 Processo / Subprocesso
+                 </th>
+                 {config.devs.map(d => (
+                   <th key={d} style={{ background: "#111827", padding: "8px 12px", color: "#d1d5db", fontWeight: 600, borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", whiteSpace: "nowrap", textAlign: "center", minWidth: "90px" }}>
+                     <div>{d}</div>
+                       {answers[d]?.["_systems"]?.length > 0 && (
+                        <div style={{ display: "flex", gap: "2px", justifyContent: "center", marginTop: "4px", flexWrap: "wrap" }}>
+                          {answers[d]["_systems"].map(s => (
+                         <span key={s} style={{ background: "#1e3a5f", color: "#93c5fd", borderRadius: "20px", padding: "1px 6px", fontSize: "10px", border: "1px solid #1e40af" }}>{s}</span>
+                          ))}
+                      </div>
+                     )}
+                     </th>
+                      ))}
+        <th style={{ background: "#111827", padding: "8px 12px", color: "#9ca3af", fontWeight: 600, borderBottom: "1px solid #1f2937", whiteSpace: "nowrap", textAlign: "center", minWidth: "80px" }}>
+          Bus Factor
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {getRows().map((r, i) => {
+        const bf = busFactor(r.key);
+        const rowBg = i % 2 === 0 ? "#111827" : "#0f172a";
+        return (
+          <tr key={r.key}>
+            <td style={{ position: "sticky", left: 0, zIndex: 5, background: rowBg, padding: r.indent ? "6px 16px 6px 32px" : "6px 16px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #374151", whiteSpace: "nowrap", color: r.header ? "#93c5fd" : r.indent ? "#9ca3af" : "#d1d5db", fontWeight: r.header ? 600 : 400 }}>
+              {r.indent ? "↳ " : ""}{r.label}
+            </td>
+            {r.header
+              ? config.devs.map(d => <td key={d} style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", textAlign: "center", color: "#374151" }}>—</td>)
+              : config.devs.map(d => {
+                  const lvl = answers[d]?.[r.key] ?? 0;
+                  return (
+                    <td key={d} style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", textAlign: "center" }}>
+                      <span style={{ display: "inline-block", background: LEVEL_COLORS[lvl], color: "#fff", borderRadius: 4, padding: "2px 10px", fontWeight: 700, minWidth: 24 }}>{lvl}</span>
+                    </td>
+                  );
+                })
             }
+            <td style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", textAlign: "center" }}>
+              {!r.header && <span style={{ color: bfColor(bf), fontWeight: 700, fontSize: 13 }}>{bf}</span>}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
             <div className="mt-4 flex gap-4 flex-wrap">
               {[["🔴 Bus Factor 1","Risco crítico — apenas 1 pessoa domina"],["🟡 Bus Factor 2","Atenção — conhecimento concentrado"],["🟢 Bus Factor 3+","Saudável — conhecimento distribuído"]].map(([t,d]) => (
                 <div key={t} className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-xs">
