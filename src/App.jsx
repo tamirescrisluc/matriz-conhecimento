@@ -986,7 +986,7 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
               {r.indent ? "↳ " : ""}{r.label}
             </td>
             {r.header
-              ? config.devs.map(d => <td key={d} style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", textAlign: "center", color: "#374151" }}>—</td>)
+              ? config.devs.map(d => <td key={d} style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", textAlign: "center", color: "#374151" }}>{"—"}</td>)
               : config.devs.map(d => {
                   const lvl = answers[d]?.[r.key] ?? 0;
                   return (
@@ -1018,7 +1018,7 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
       </div>
     </div>
   );
-}
+
 
 // ── App Root ──────────────────────────────────────────────────
 export default function App() {
