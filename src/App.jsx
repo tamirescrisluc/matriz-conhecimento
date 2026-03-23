@@ -495,8 +495,60 @@ function DevFillView({ dev, config, initialAnswers, onSave, onLogout }) {
   );
 }
 
+// ── Change Password View ──────────────────────────────────────
+function ChangePasswordView({ manager, onChanged, onLogout }) {
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [msg, setMsg] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  async function handleChange() {
+    if (newPass.trim().length < 4) { setMsg({ ok: false, text: "A senha deve ter pelo menos 4 caracteres." }); return; }
+    if (newPass !== confirmPass) { setMsg({ ok: false, text: "As senhas não coincidem." }); return; }
+    setSaving(true);
+    await onChanged(newPass.trim());
+    setSaving(false);
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4" style={{ fontFamily: "system-ui,sans-serif" }}>
+      <div className="w-full max-w-sm space-y-6">
+        <div className="text-center">
+          <div className="mb-1">
+            <p className="text-orange-400 font-bold text-2xl tracking-widest leading-none">TAGAT</p>
+            <p className="text-orange-400 font-light text-xs tracking-widest">Foodtech</p>
+          </div>
+          <h1 className="text-xl font-bold text-white mt-4">Redefinir Senha</h1>
+          <p className="text-gray-500 text-sm mt-1">Olá, <span className="text-yellow-400 font-semibold">{manager.name}</span>! Defina sua nova senha para continuar.</p>
+        </div>
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Nova senha</label>
+            <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)}
+              placeholder="Digite a nova senha..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600 text-white" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Confirmar senha</label>
+            <input type="password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleChange()}
+              placeholder="Confirme a nova senha..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600 text-white" />
+          </div>
+          {msg && <p className={`text-xs text-center ${msg.ok ? "text-green-400" : "text-red-400"}`}>{msg.text}</p>}
+          <button onClick={handleChange} disabled={saving}
+            className="w-full bg-yellow-600 hover:bg-yellow-500 disabled:opacity-60 py-3 rounded-xl font-semibold text-sm text-white transition-colors">
+            {saving ? "Salvando..." : "Confirmar nova senha"}
+          </button>
+          <button onClick={onLogout} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Entry Screen ──────────────────────────────────────────────
-function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAccess, onChangePass }) {
+function EntryScreen({ config, devCodes, managers, onDevAccess, onManagerAccess, onChangePass }) {
   const [screen, setScreen] = useState("dev");
   const [code, setCode] = useState("");
   const [codeErr, setCodeErr] = useState("");
@@ -506,6 +558,7 @@ function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAcce
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [changeMsg, setChangeMsg] = useState(null);
+  const [name, setName] = useState("");
 
   function tryCode() {
     const trimmed = code.trim().toLowerCase();
@@ -521,10 +574,12 @@ function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAcce
     else { setCodeErr("Código inválido. Verifique com seu gestor."); setTimeout(() => setCodeErr(""), 2500); }
   }
 
-  function tryManager() {
-    if (pass === managerPass) onManagerAccess();
-    else { setPassErr("Senha incorreta."); setTimeout(() => setPassErr(""), 2500); }
-  }
+ function tryManager() {
+  if (!name.trim()) { setPassErr("Digite seu nome."); setTimeout(() => setPassErr(""), 2500); return; }
+  const manager = managers.find(m => m.name.toLowerCase() === name.trim().toLowerCase() && m.password === pass);
+  if (manager) onManagerAccess(manager);
+  else { setPassErr("Nome ou senha incorretos."); setTimeout(() => setPassErr(""), 2500); }
+}
   function tryChangePass() {
     if (oldPass !== managerPass) { setChangeMsg({ ok: false, text: "Senha atual incorreta." }); return; }
     if (newPass.trim().length < 4) { setChangeMsg({ ok: false, text: "A nova senha deve ter pelo menos 4 caracteres." }); return; }
@@ -557,18 +612,20 @@ function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAcce
             <button onClick={() => reset("manager")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">Acesso de gestor</button>
           </div>
         )}
-        {screen === "manager" && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
-            <p className="text-gray-300 text-sm text-center font-semibold">Acesso de Gestor</p>
-            <input type="password" value={pass} onChange={e => setPass(e.target.value)} onKeyDown={e => e.key === "Enter" && tryManager()}
-              placeholder="Digite a senha..." autoFocus
-              className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-sm focus:outline-none placeholder-gray-600 ${passErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
-            {passErr && <p className="text-red-400 text-xs text-center">{passErr}</p>}
-            <button onClick={tryManager} className="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Entrar como Gestor</button>
-            <button onClick={() => reset("changepass")} className="w-full text-yellow-700 hover:text-yellow-500 text-xs py-1 transition-colors">🔐 Alterar senha</button>
-            <button onClick={() => reset("dev")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
-          </div>
-        )}
+{screen === "manager" && (
+  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+    <p className="text-gray-300 text-sm text-center font-semibold">Acesso de Gestor</p>
+    <input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && tryManager()}
+      placeholder="Seu nome..." autoFocus
+      className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-sm focus:outline-none placeholder-gray-600 ${passErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
+    <input type="password" value={pass} onChange={e => setPass(e.target.value)} onKeyDown={e => e.key === "Enter" && tryManager()}
+      placeholder="Senha..."
+      className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-sm focus:outline-none placeholder-gray-600 ${passErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
+    {passErr && <p className="text-red-400 text-xs text-center">{passErr}</p>}
+    <button onClick={tryManager} className="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Entrar como Gestor</button>
+    <button onClick={() => reset("dev")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
+  </div>
+)}
         {screen === "changepass" && (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
             <p className="text-gray-300 text-sm text-center font-semibold">🔐 Alterar Senha do Gestor</p>
@@ -591,8 +648,8 @@ function EntryScreen({ config, devCodes, managerPass, onDevAccess, onManagerAcce
 }
 
 // ── Manager View ──────────────────────────────────────────────
-function ManagerView({ config, answers, history, devCodes, managerPass, onChangePass, onUpdateConfig, onUpdateAnswers, onUpdateHistory, onSaveDevAnswers, onLogout }) {
-  const [tab, setTab] = useState("admin");
+function ManagerView({ config, answers, history, devCodes, isMaster, managerName, managers, onUpdateManagers, managerPass, onChangePass, onUpdateConfig, onUpdateAnswers, onUpdateHistory, onSaveDevAnswers, onLogout }) {
+  const [tab, setTab] = useState(isMaster ? "admin" : "matrix");
   const [newDev, setNewDev] = useState("");
   const [newMod, setNewMod] = useState("");
   const [newSubs, setNewSubs] = useState({});
@@ -680,7 +737,10 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
       </div>
 
       <div className="bg-gray-900 border-b border-gray-800 flex overflow-x-auto">
-        {[["admin","⚙️ Admin"],["links","🔗 Devs"],["preview","👁️ Simular Dev"],["matrix","📊 Matriz"]].map(([k,l]) => (
+        {(isMaster
+          ? [["admin","⚙️ Admin"],["links","🔗 Devs"],["preview","👁️ Simular Dev"],["matrix","📊 Matriz"],["gestores","👤 Gestores"]]
+           : [["matrix","📊 Matriz"]]
+          ).map(([k,l]) => (
           <button key={k} onClick={() => setTab(k)}
             className={`px-5 py-3 text-sm font-medium whitespace-nowrap transition-colors ${tab === k ? "border-b-2 border-yellow-500 text-yellow-400" : "text-gray-400 hover:text-gray-200"}`}>
             {l}
@@ -891,6 +951,70 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
           </div>
         )}
 
+{/* ── GESTORES TAB ── */}
+{tab === "gestores" && (
+  <div className="space-y-6">
+    <div>
+      <h2 className="text-base font-semibold text-gray-200 mb-1">👤 Gestores</h2>
+      <p className="text-gray-500 text-xs mb-4">Gerencie os gestores com acesso à Matriz de Conhecimento.</p>
+    </div>
+
+    {/* Adicionar novo gestor */}
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+      <h3 className="text-sm font-semibold text-gray-300">+ Novo Gestor</h3>
+      <div className="flex gap-2">
+        <input id="newManagerName" placeholder="Nome do gestor..."
+          className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600 text-white" />
+        <input id="newManagerPass" placeholder="Senha provisória..."
+          className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600 text-white" />
+        <button onClick={async () => {
+          const name = document.getElementById("newManagerName").value.trim();
+          const pass = document.getElementById("newManagerPass").value.trim();
+          if (!name || !pass) return alert("Preencha nome e senha.");
+          if (managers.find(m => m.name.toLowerCase() === name.toLowerCase())) return alert("Gestor já cadastrado.");
+          const { data, error } = await supabase.from('managers').insert({ name, password: pass, is_master: false, must_change_password: true }).select().single();
+          if (error) return alert("Erro ao cadastrar gestor.");
+          onUpdateManagers([...managers, data]);
+          document.getElementById("newManagerName").value = "";
+          document.getElementById("newManagerPass").value = "";
+        }}
+          className="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-lg text-sm font-semibold text-white whitespace-nowrap">
+          + Adicionar
+        </button>
+      </div>
+    </div>
+
+    {/* Lista de gestores */}
+    <div className="space-y-3">
+      {managers.filter(m => !m.is_master).length === 0
+        ? <p className="text-gray-500 text-sm">Nenhum gestor cadastrado ainda.</p>
+        : managers.filter(m => !m.is_master).map(m => (
+          <div key={m.id} className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-white font-medium text-sm">{m.name}</p>
+              <p className="text-xs mt-0.5">
+                {m.must_change_password
+                  ? <span className="text-yellow-500">⏳ Aguardando troca de senha</span>
+                  : <span className="text-green-400">✅ Senha definida</span>}
+              </p>
+            </div>
+            <button onClick={async () => {
+              if (!confirm(`Remover o gestor ${m.name}?`)) return;
+              await supabase.from('managers').delete().eq('id', m.id);
+              onUpdateManagers(managers.filter(x => x.id !== m.id));
+            }}
+              className="text-xs text-gray-600 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg border border-gray-700 hover:border-red-800">
+              Remover
+            </button>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+)}
+
+
+
  {/* ── MATRIX TAB ── */}
         {tab === "matrix" && (
           <div>
@@ -1033,6 +1157,7 @@ export default function App() {
   const [answers, setAnswers] = useState({});
   const [history, setHistory] = useState({});
   const [devCodes, setDevCodes] = useState({});
+  const [managers, setManagers] = useState([]);
   const [managerPass, setManagerPass] = useState(DEFAULT_PASS);
   const [session, setSession] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -1045,6 +1170,7 @@ export default function App() {
           supabase.from('answers').select('dev, data'),
           supabase.from('history').select('*').order('timestamp', { ascending: true }),
           supabase.from('dev_codes').select('dev, code'),
+          supabase.from('managers').select('*'),
         ]);
         if (cfgData) setConfig(cfgData.data);
         if (ansData) {
@@ -1065,6 +1191,8 @@ export default function App() {
           codesData.forEach(row => { codes[row.dev] = row.code; });
           setDevCodes(codes);
         }
+        if (managersData) setManagers(managersData);
+
       } catch(e) { console.error(e); }
       setLoaded(true);
     }
@@ -1111,7 +1239,14 @@ export default function App() {
     </div>
   );
 
-  if (!session) return <EntryScreen config={config} devCodes={devCodes} managerPass={managerPass} onDevAccess={dev => setSession({ dev })} onManagerAccess={() => setSession("manager")} onChangePass={savePass} />;
-  if (session === "manager") return <ManagerView config={config} answers={answers} history={history} devCodes={devCodes} managerPass={managerPass} onChangePass={savePass} onUpdateConfig={saveConfig} onUpdateAnswers={saveAnswers} onUpdateHistory={saveHistory} onSaveDevAnswers={saveDevAnswers} onLogout={() => setSession(null)} />;
-  return <DevFillView dev={session.dev} config={config} initialAnswers={answers[session.dev] || {}} onSave={saveDevAnswers} onLogout={() => setSession(null)} />;
+if (!session) return <EntryScreen config={config} devCodes={devCodes} managers={managers} onDevAccess={dev => setSession({ dev })} onManagerAccess={manager => setSession({ manager })} />;
+
+if (session?.manager) {
+  if (session.manager.must_change_password) {
+    return <ChangePasswordView manager={session.manager} onChanged={async (newPass) => {
+      await supabase.from('managers').update({ password: newPass, must_change_password: false }).eq('id', session.manager.id);
+      setSession({ manager: { ...session.manager, password: newPass, must_change_password: false } });
+    }} onLogout={() => setSession(null)} />;
+  }
+  return <ManagerView config={config} answers={answers} history={history} devCodes={devCodes} isMaster={session.manager.is_master} managerName={session.manager.name} managers={managers} onUpdateManagers={setManagers} managerPass={managerPass} onChangePass={savePass} onUpdateConfig={saveConfig} onUpdateAnswers={saveAnswers} onUpdateHistory={saveHistory} onSaveDevAnswers={saveDevAnswers} onLogout={() => setSession(null)} />;
 }
