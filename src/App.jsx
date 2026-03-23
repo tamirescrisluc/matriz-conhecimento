@@ -688,7 +688,7 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
         ))}
       </div>
 
-      <div className="p-6 max-w-full mx-auto">
+      <div className="p-6 max-w-7x1 mx-auto">
 
         {/* ── ADMIN TAB ── */}
         {tab === "admin" && (
