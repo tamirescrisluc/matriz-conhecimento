@@ -1009,13 +1009,13 @@ function ManagerView({ config, answers, history, devCodes, managerPass, onChange
             }
 
             <div className="mt-4 flex gap-4 flex-wrap">
-              {[["Bus Factor 1","Risco critico - apenas 1 pessoa domina"],["Bus Factor 2","Atencao - conhecimento concentrado"],["Bus Factor 3+","Saudavel - conhecimento distribuido"]].map(([t,d]) => (
-                <div key={t} className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-xs">
-                  <p className="font-semibold text-gray-200">{t}</p>
-                  <p className="text-gray-500 mt-0.5">{d}</p>
-                </div>
-              ))}
+             {[["Bus Factor 1","Risco critico - apenas 1 pessoa domina"],["Bus Factor 2","Atencao - conhecimento concentrado"],["Bus Factor 3+","Saudavel - conhecimento distribuido"]].map(([t,d]) => (
+             <div key={t} className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-xs">
+              <p className="font-semibold text-gray-200">{t}</p>
+             <p className="text-gray-500 mt-0.5">{d}</p>
             </div>
+              ))}
+          </div>
           </div>
         )}
 
