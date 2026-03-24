@@ -1250,3 +1250,6 @@ if (session?.manager) {
   }
   return <ManagerView config={config} answers={answers} history={history} devCodes={devCodes} isMaster={session.manager.is_master} managerName={session.manager.name} managers={managers} onUpdateManagers={setManagers} managerPass={managerPass} onChangePass={savePass} onUpdateConfig={saveConfig} onUpdateAnswers={saveAnswers} onUpdateHistory={saveHistory} onSaveDevAnswers={saveDevAnswers} onLogout={() => setSession(null)} />;
 }
+
+return <DevFillView dev={session.dev} config={config} initialAnswers={answers[session.dev] || {}} onSave={saveDevAnswers} onLogout={() => setSession(null)} />;
+}
