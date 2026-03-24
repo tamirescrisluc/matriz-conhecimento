@@ -1050,7 +1050,7 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
                         const lvl = answers[d]?.[r.key] ?? 0;
                         return `<td style="padding:6px 10px;border-bottom:1px solid #1f2937;border-right:1px solid #1f2937;text-align:center"><span style="display:inline-block;background:${LEVEL_COLORS[lvl]};color:#fff;font-weight:700;border-radius:4px;padding:1px 8px;font-size:11px">${lvl}</span></td>`;
                       }).join("");
-                      return `<tr style="background:${bg}"><td style="padding:6px 12px;border-bottom:1px solid #1f2937;border-right:1px solid #1f2937;color:#9ca3af;font-size:12px;white-space:nowrap">${r.indent ? "-> " : ""}${r.label}</td>${devCells}<td style="padding:6px 10px;border-bottom:1px solid #1f2937;text-align:center;font-weight:700;font-size:13px;color:${bfCol}">${bf}</td></tr>`;
+                      return `<tr style="background:${bg}"><td style="padding:6px 12px;border-bottom:1px solid #1f2937;border-right:1px solid #1f2937;color:#9ca3af;font-size:12px;white-space:nowrap">${r.indent ? "-> " : ""}${r.label}</td><td style="padding:6px 10px;border-bottom:1px solid #1f2937;border-right:1px solid #1f2937;text-align:center;font-weight:700;font-size:13px;color:${bfCol}">${bf}</td>${devCells}</tr>`;
                     }).join("");
                     const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/><title>Matriz de Conhecimento</title>
 <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;background:#030712;color:#fff;padding:32px}h1{font-size:18px;font-weight:700;margin-bottom:4px}.sub{font-size:12px;color:#6b7280;margin-bottom:20px}.legend{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}.legend span{font-size:11px;color:#9ca3af;display:flex;align-items:center;gap:4px}.dot{width:10px;height:10px;border-radius:2px;display:inline-block}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:#1e293b}thead th:first-child{text-align:left}.bf-legend{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap}.bf-item{background:#111827;border:1px solid #1f2937;border-radius:8px;padding:8px 12px;font-size:11px}.bf-item p:first-child{font-weight:600;color:#e5e7eb}.bf-item p:last-child{color:#6b7280;margin-top:2px}footer{text-align:center;font-size:11px;color:#374151;margin-top:24px}@media print{body{padding:16px}@page{margin:1cm;size:landscape}}</style>
@@ -1058,7 +1058,7 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
 <h1>Matriz de Conhecimento</h1>
 <p class="sub">Bus Factor Tracker - ${new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric" })}</p>
 <div class="legend">${LEVEL_COLORS.map((c,i) => `<span><span class="dot" style="background:${c}"></span>${LEVELS[i].label}</span>`).join("")}</div>
-<table><thead><tr><th style="padding:8px 12px;color:#fff;font-size:11px;font-weight:600;border-bottom:1px solid #374151;border-right:1px solid #374151;text-align:left;min-width:180px">Processo / Subprocesso</th>${headerCols}<th style="padding:8px 12px;color:#fff;font-size:11px;font-weight:600;border-bottom:1px solid #374151;text-align:center">Bus Factor</th></tr></thead><tbody>${bodyRows}</tbody></table>
+<table><thead><tr><th style="padding:8px 12px;color:#fff;font-size:11px;font-weight:600;border-bottom:1px solid #374151;border-right:1px solid #374151;text-align:left;min-width:180px">Processo / Subprocesso</th><th style="padding:8px 12px;color:#fff;font-size:11px;font-weight:600;border-bottom:1px solid #374151;border-right:1px solid #374151;text-align:center">Bus Factor</th>${headerCols}</tr></thead><tbody>${bodyRows}</tbody></table>
 <div class="bf-legend"><div class="bf-item"><p>Bus Factor 1</p><p>Risco critico</p></div><div class="bf-item"><p>Bus Factor 2</p><p>Atencao</p></div><div class="bf-item"><p>Bus Factor 3+</p><p>Saudavel</p></div></div>
 <footer>Bus Factor Tracker - Documento gerado automaticamente</footer>
 <script>window.onload=function(){window.print();setTimeout(()=>window.close(),1000)};</script>
@@ -1086,6 +1086,9 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
                         <th style={{ position: "sticky", left: 0, zIndex: 20, background: "#111827", padding: "10px 16px", textAlign: "left", color: "#9ca3af", fontWeight: 600, borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", whiteSpace: "nowrap", minWidth: "220px" }}>
                           Processo / Subprocesso
                         </th>
+                        <th style={{ background: "#111827", padding: "8px 12px", color: "#9ca3af", fontWeight: 600, borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", whiteSpace: "nowrap", textAlign: "center", minWidth: "80px" }}>
+                          Bus Factor
+                        </th>
                         {config.devs.map(d => (
                           <th key={d} style={{ background: "#111827", padding: "8px 12px", color: "#d1d5db", fontWeight: 600, borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", whiteSpace: "nowrap", textAlign: "center", minWidth: "90px" }}>
                             <div>{d}</div>
@@ -1098,9 +1101,6 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
                             )}
                           </th>
                         ))}
-                        <th style={{ background: "#111827", padding: "8px 12px", color: "#9ca3af", fontWeight: 600, borderBottom: "1px solid #1f2937", whiteSpace: "nowrap", textAlign: "center", minWidth: "80px" }}>
-                          Bus Factor
-                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1111,6 +1111,9 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
                           <tr key={r.key}>
                             <td style={{ position: "sticky", left: 0, zIndex: 5, background: rowBg, padding: r.indent ? "6px 16px 6px 32px" : "6px 16px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #374151", whiteSpace: "nowrap", color: r.header ? "#93c5fd" : r.indent ? "#9ca3af" : "#d1d5db", fontWeight: r.header ? 600 : 400 }}>
                               {r.indent ? "-> " : ""}{r.label}
+                            </td>
+                            <td style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", textAlign: "center" }}>
+                              {!r.header && <span style={{ color: bfColor(bf), fontWeight: 700, fontSize: 13 }}>{bf}</span>}
                             </td>
                             {r.header
                               ? config.devs.map(d => <td key={d} style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", borderRight: "1px solid #1f2937", textAlign: "center", color: "#374151" }}>{"—"}</td>)
@@ -1123,9 +1126,6 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
                                   );
                                 })
                             }
-                            <td style={{ background: rowBg, padding: "6px 12px", borderBottom: "1px solid #1f2937", textAlign: "center" }}>
-                              {!r.header && <span style={{ color: bfColor(bf), fontWeight: 700, fontSize: 13 }}>{bf}</span>}
-                            </td>
                           </tr>
                         );
                       })}
