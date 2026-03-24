@@ -994,7 +994,10 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
               <p className="text-white font-medium text-sm">{m.name}</p>
               <p className="text-xs mt-0.5">
                 {m.must_change_password
-                  ? <span className="text-yellow-500">⏳ Aguardando troca de senha</span>
+                  ? <>
+                      <span className="text-yellow-500">⏳ Aguardando troca de senha</span>
+                      <span className="text-gray-400 ml-2">Senha: <span className="text-yellow-300 font-mono select-all">{m.password}</span></span>
+                    </>
                   : <span className="text-green-400">✅ Senha definida</span>}
               </p>
             </div>
