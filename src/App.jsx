@@ -718,7 +718,7 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
     return rows;
   }
 
-  function busFactor(key) { return config.devs.filter(d => (answers[d]?.[key] ?? 0) >= 2).length; }
+  function busFactor(key) { return config.devs.filter(d => (answers[d]?.[key] ?? 0) >= 3).length; }
   function bfColor(n) { if (n <= 1) return "#ef4444"; if (n === 2) return "#eab308"; return "#22c55e"; }
 
   if (viewSnapshot) return <SnapshotView dev={viewSnapshot.dev} snapshot={viewSnapshot.snapshot} config={config} onBack={() => setViewSnapshot(null)} />;
@@ -1024,7 +1024,7 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-base font-semibold text-gray-200">Matriz de Conhecimento</h2>
-                <p className="text-gray-500 text-xs mt-0.5">Cor por nivel - Bus Factor = devs com nivel 2 ou mais</p>
+                <p className="text-gray-500 text-xs mt-0.5">Cor por nivel - Bus Factor = devs com nivel 3 ou mais</p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex gap-2 text-xs text-gray-500 items-center">
@@ -1044,7 +1044,7 @@ function ManagerView({ config, answers, history, devCodes, isMaster, managerName
                     const bodyRows = getRows().map((r, i) => {
                       const bg = i % 2 === 0 ? "#111827" : "#0f172a";
                       if (r.header) return `<tr style="background:#1e293b"><td colspan="${config.devs.length + 2}" style="padding:8px 12px;color:#93c5fd;font-size:12px;font-weight:600">${r.label}</td></tr>`;
-                      const bf = config.devs.filter(d => (answers[d]?.[r.key] ?? 0) >= 2).length;
+                      const bf = config.devs.filter(d => (answers[d]?.[r.key] ?? 0) >= 3).length;
                       const bfCol = bf <= 1 ? "#ef4444" : bf === 2 ? "#eab308" : "#22c55e";
                       const devCells = config.devs.map(d => {
                         const lvl = answers[d]?.[r.key] ?? 0;
