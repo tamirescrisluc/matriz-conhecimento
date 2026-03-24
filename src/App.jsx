@@ -1165,7 +1165,7 @@ export default function App() {
   useEffect(() => {
     async function load() {
       try {
-        const [{ data: cfgData }, { data: ansData }, { data: histData }, { data: codesData }] = await Promise.all([
+        const [{ data: cfgData }, { data: ansData }, { data: histData }, { data: codesData }, { data: managersData }] = await Promise.all([
           supabase.from('config').select('data').eq('id', 'main').single(),
           supabase.from('answers').select('dev, data'),
           supabase.from('history').select('*').order('timestamp', { ascending: true }),
