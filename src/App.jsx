@@ -549,7 +549,7 @@ function ChangePasswordView({ manager, onChanged, onLogout }) {
 
 // ── Entry Screen ──────────────────────────────────────────────
 function EntryScreen({ config, devCodes, managers, onDevAccess, onManagerAccess, onChangePass }) {
-  const [screen, setScreen] = useState("dev");
+  const [screen, setScreen] = useState("choose");
   const [code, setCode] = useState("");
   const [codeErr, setCodeErr] = useState("");
   const [pass, setPass] = useState("");
@@ -601,20 +601,27 @@ function EntryScreen({ config, devCodes, managers, onDevAccess, onManagerAccess,
           <h1 className="text-2xl font-bold text-white mt-4">Matriz de Conhecimento</h1>
           <p className="text-gray-500 text-sm mt-1">Bus Factor Tracker</p>
         </div>
+        {screen === "choose" && (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <p className="text-gray-300 text-sm text-center">Como deseja acessar?</p>
+            <button onClick={() => reset("dev")} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Responder Questionario</button>
+            <button onClick={() => reset("manager")} className="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Acesso do Gestor</button>
+          </div>
+        )}
         {screen === "dev" && (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
-            <p className="text-gray-300 text-sm text-center">Digite seu código de acesso:</p>
+            <p className="text-gray-300 text-sm text-center">Digite o codigo fornecido pelo Gestor:</p>
             <input value={code} onChange={e => setCode(e.target.value)} onKeyDown={e => e.key === "Enter" && tryCode()}
-              placeholder="Cole seu código aqui" autoFocus
+              placeholder="Cole seu codigo aqui" autoFocus
               className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-center font-mono text-sm tracking-wider focus:outline-none placeholder-gray-600 ${codeErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
             {codeErr && <p className="text-red-400 text-xs text-center">{codeErr}</p>}
             <button onClick={tryCode} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Acessar</button>
-            <button onClick={() => reset("manager")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">Acesso de gestor</button>
+            <button onClick={() => reset("choose")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
           </div>
         )}
 {screen === "manager" && (
   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
-    <p className="text-gray-300 text-sm text-center font-semibold">Acesso de Gestor</p>
+    <p className="text-gray-300 text-sm text-center font-semibold">Acesso do Gestor</p>
     <input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && tryManager()}
       placeholder="Seu nome..." autoFocus
       className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-sm focus:outline-none placeholder-gray-600 ${passErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
@@ -623,7 +630,7 @@ function EntryScreen({ config, devCodes, managers, onDevAccess, onManagerAccess,
       className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-sm focus:outline-none placeholder-gray-600 ${passErr ? "border-red-600 text-red-400" : "border-gray-700 focus:border-blue-500 text-white"}`} />
     {passErr && <p className="text-red-400 text-xs text-center">{passErr}</p>}
     <button onClick={tryManager} className="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Entrar como Gestor</button>
-    <button onClick={() => reset("dev")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
+    <button onClick={() => reset("choose")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
   </div>
 )}
         {screen === "changepass" && (
@@ -639,7 +646,7 @@ function EntryScreen({ config, devCodes, managers, onDevAccess, onManagerAccess,
             ))}
             {changeMsg && <p className={`text-xs text-center ${changeMsg.ok ? "text-green-400" : "text-red-400"}`}>{changeMsg.text}</p>}
             <button onClick={tryChangePass} className="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Confirmar alteração</button>
-            <button onClick={() => reset("manager")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
+            <button onClick={() => reset("choose")} className="w-full text-gray-600 hover:text-gray-400 text-xs py-1 transition-colors">← Voltar</button>
           </div>
         )}
       </div>
