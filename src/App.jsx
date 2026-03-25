@@ -604,7 +604,7 @@ function EntryScreen({ config, devCodes, managers, onDevAccess, onManagerAccess,
         {screen === "choose" && (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
             <p className="text-gray-300 text-sm text-center">Como deseja acessar?</p>
-            <button onClick={() => reset("dev")} style={{ background: "#044c43" }} className="w-full hover:opacity-90 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Responder Questionario</button>
+            <button onClick={() => reset("dev")} style={{ background: "#044c44" }} className="w-full hover:opacity-90 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Responder Questionario</button>
             <button onClick={() => reset("manager")} className="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold text-sm text-white transition-colors">Acesso do Gestor</button>
           </div>
         )}
